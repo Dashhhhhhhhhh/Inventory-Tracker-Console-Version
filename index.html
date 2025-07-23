@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Tracker</title>
+</head><body>
+    <script>
+
+        let inventory = [];
+
+
+const addItem = function(name = "unknown", quantity = "0", price = "0.00") {
+    const capitalize = item => item.charAt(0).toUpperCase() + item.slice(1);
+    let formattedName = capitalize(name.trim());
+
+    let formattedPrice = parseFloat(price);
+    let formattedQuantity = parseFloat(quantity);
+            
+    if (isNaN(formattedQuantity) || formattedQuantity < 0) {
+        console.log("Invalid. Please enter a valid number");
+        return;
+    }
+    if (isNaN(formattedPrice) || formattedPrice < 0) {
+        console.log("Invalid. Please enter a valid number");
+        return;
+    }
+
+    formattedPrice = formattedPrice.toFixed(2);
+
+    let getStatus = quantity => {
+    if (formattedQuantity === 0) {
+        status = "Out of Stock";
+    } else if (formattedQuantity <= 3) {
+        status = "Low on Stock";
+    } else {
+        status = "In Stock";
+    };
+
+    let itemFound = false;
+    for (let i = 0; i < inventory.length; i++) {
+        if (inventory[i].name === formattedName) {
+            itemFound = true;
+
+            let oldStatus = inventory[i].status;
+
+            inventory[i].quantity += formattedQuantity;
+
+            inventory[i].status = 
+                inventory[i].quantity === 0 ? "Out of Stock" :
+                inventory[i].quantity <= 3 ? "Low on Stock" :
+                "In Stock";
+
+            if (oldStatus !== inventory[i].status) {
+                console.log(`Status for "${formattedName}" changed from ${oldStatus} to ${inventory[i].status}`);
+            } else {
+                console.log(`Quantity updated for "${formattedName}".`);
+            }
+            break;
+        }
+    }
+            
+    if (!itemFound) {
+        const add = { name: formattedName, quantity: formattedQuantity, price: formattedPrice, status };
+        inventory.push(add);
+        console.lsog(`Item: "${formattedName}" added! (Qty: ${formattedQuantity}, Price: ${formattedPrice})`);
+    }
+};
+}
+
+const showItems = function(filterType = "all", inventory) {
+    
+    let finalInventory = [];
+
+    if (filterType !== "in" && filterType !== "low" && filterType !== "out" && filterType !== "all") {
+    console.log("❌ Unknown filter: 'instock'. Try 'in', 'low', 'out', or 'all'.");
+    return;
+    }
+
+
+    if (filterType === "in") {
+        finalInventory = inventory.filter(item => item.status === "In Stock");
+    } else if  (filterType === "low") {
+        finalInventory = inventory.filter(item => item.status === "Low on Stock");
+    } else if (filterType === "out") {
+        finalInventory = inventory.filter(item => item.status === "Out of Stock");
+    } 
+
+    
+    finalInventory.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+
+    if (finalInventory.length === 0) {
+        console.log("No items found");
+        return;
+    }
+
+    for (let i = 0; i < finalInventory.length; i += 1) {
+        console.log(`"${i + 1}". ${finalInventory[i].name} - Qty: ${finalInventory[i].quantity} - Price: ${finalInventory[i].price} - Status: ${finalInventory[i].status}`);
+    }
+
+const deleteItems = function(inventoryList, inventoryName) {
+
+    const removeItem = inventoryList.findIndex(item => item.name.toLowerCase() === inventoryName.toLowerCase());
+    
+    if (removeItem === -1) {
+        console.log(`${inventoryName} not found.`);
+        for (let i = 0; i < inventoryList.length; i += 1) {
+        console.log(`"${i + 1}". ${inventoryList[i].name} - Qty: ${inventoryList[i].quantity} - Price: ${inventoryList[i].price} - Status: ${inventoryList[i].status}`);
+        }
+        return false;
+    } else {
+        inventoryList.splice(removeItem, 1);
+        console.log(`Item: ${inventoryName} deleted.`);   
+    }
+
+    if (inventoryList.length === 0) {
+    console.log("Inventory is now empty.");
+}
+};
+
+const deleteLastItem = function (inventoryList) {
+    const removedItem= inventoryList.pop();
+    
+    if (removedItem) {
+        console.log(`🗑️ Removed: ${removedItem.name} — Qty: ${removedItem.quantity}`);
+    } else {
+         console.log("⚠️ Inventory is empty — nothing to delete.");
+}
+    inventoryList.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
+    for (let i  = 0; i < inventoryList.length; i+=1) {
+        console.log(`"${i + 1}". ${inventoryList[i].name} - Qty: ${inventoryList[i].quantity} - Price: ${inventoryList[i].price} - Status: ${inventoryList[i].status}`);
+    }
+};
+}
+
+showItems("all", inventory);
+showItems("low", inventory);
+showItems("out", inventory);
+showItems("in", []);
+
+
+    </script>
+</body>
+</html>
