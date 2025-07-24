@@ -182,8 +182,43 @@ function printFilteredInventory(list, filterType) {
     const sortedOut = getOutStockItems(list).sort ((a, b) => a.name.localeCompare(b.name));
     renderItems(sortedOut);
     }
-}   
 }
+
+    function getStatus(quantity) {
+        return quantity === 0
+        ? "Out of Stock"
+        : quantity <= 3
+        ? "Low Stock"
+        : "In Stock";
+    }
+
+const searchItem = function(inventoryList, itemName) {
+  if (!itemName.trim()) {
+    console.log("🔎 Please enter an item name to search.");
+    return;
+  }
+
+  const findItem = inventoryList.filter(item =>
+    item.name.toLowerCase().includes(itemName.toLowerCase())
+  );
+
+  if (findItem.length === 0) {
+    console.log("📭 Sorry, no items matched your search.");
+    return;
+  } else {
+    const formattedItem = findItem.map(item => {
+      const name = item.name;
+      const quantity = item.quantity;
+      const status = getStatus(quantity);
+
+      return `Found: ${name} - Quantity: ${quantity} - Status: ${status}`;
+    });
+
+    formattedItem.forEach(output => console.log(output));
+  }
+};
+}
+ 
     </script>
 </body>
 </html>
