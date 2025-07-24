@@ -132,14 +132,58 @@ const deleteLastItem = function (inventoryList) {
         console.log(`"${i + 1}". ${inventoryList[i].name} - Qty: ${inventoryList[i].quantity} - Price: ${inventoryList[i].price} - Status: ${inventoryList[i].status}`);
     }
 };
+
+const printInventory = function(inventoryList, filterType) {
+
+    const all = [...inventoryList];
+    const sortAll = all.sort((a, b) => a.name.localeCompare(b.name));
+    for (let i = 0; i <sortAll.length; i+=1) {
+        console.log(`"${i + 1}". ${sortAll[i].name} - Qty: ${sortAll[i].quantity} - Price: ${sortAll[i].price} - Status: ${sortAll[i].status}`);
+    }
+    }
+const renderItems = function(array) {
+        if (array.length === 0) {
+        console.log("⚠️ Inventory is empty.");
+        } else {
+        for (let i = 0; i < array.length; i++) {
+        console.log(`"${i + 1}". ${array[i].name} - Qty: ${array[i].quantity} - Price: ${array[i].price} - Status: ${array[i].status}`);
+        }
+    }
+};
+function getInStockItems(list) {
+    return list.filter(item => getStatus(item) === "In Stock");
+};
+
+function getLowStockItems(list) {
+     return list.filter(item => getStatus(item) === "Low Stock");
+};
+
+function getOutStockItems (list) {
+    return list.filter(item => getStatus(item) === "Out of Stock");
+};
+
+function printFilteredInventory(list, filterType) {
+
+
+    if (filterType !== "in" && filterType !== "low" && filterType !== "out") {
+    console.log(`❌ Unknown filter: '${filterType}'. Try 'in', 'low', or 'out'.`);
+    return;
+    }
+
+    if (filterType === "in") {
+    const sortedIn = getInStockItems(list).sort ((a, b) => a.name.localeCompare(b.name));
+    renderItems(sortedIn);
+    }
+    if (filterType === "low") {
+    const sortedLow = getLowStockItems(list).sort ((a, b) => a.name.localeCompare(b.name));
+    renderItems(sortedLow);
+    }
+    if (filterType === "out") {
+    const sortedOut = getOutStockItems(list).sort ((a, b) => a.name.localeCompare(b.name));
+    renderItems(sortedOut);
+    }
+}   
 }
-
-showItems("all", inventory);
-showItems("low", inventory);
-showItems("out", inventory);
-showItems("in", []);
-
-
     </script>
 </body>
 </html>
