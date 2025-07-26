@@ -6,17 +6,18 @@
     <title>Inventory Tracker</title>
 </head><body>
     <script>
+const store = {
+    inventory: [],
+    salesLog: []
+};
 
-        let inventory = [];
-
-
-const addItem = function(name = "unknown", quantity = "0", price = "0.00") {
+const addItem = function (name = "unknown", quantity = "0", price = "0.00") {
     const capitalize = item => item.charAt(0).toUpperCase() + item.slice(1);
     let formattedName = capitalize(name.trim());
 
     let formattedPrice = parseFloat(price);
     let formattedQuantity = parseFloat(quantity);
-            
+
     if (isNaN(formattedQuantity) || formattedQuantity < 0) {
         console.log("Invalid. Please enter a valid number");
         return;
@@ -28,197 +29,242 @@ const addItem = function(name = "unknown", quantity = "0", price = "0.00") {
 
     formattedPrice = formattedPrice.toFixed(2);
 
-    let getStatus = quantity => {
+    let status;
     if (formattedQuantity === 0) {
         status = "Out of Stock";
     } else if (formattedQuantity <= 3) {
         status = "Low on Stock";
     } else {
         status = "In Stock";
-    };
+    }
 
     let itemFound = false;
-    for (let i = 0; i < inventory.length; i++) {
-        if (inventory[i].name === formattedName) {
+    for (let i = 0; i < store.inventory.length; i++) {
+        if (store.inventory[i].name === formattedName) {
             itemFound = true;
 
-            let oldStatus = inventory[i].status;
+            let oldStatus = store.inventory[i].status;
 
-            inventory[i].quantity += formattedQuantity;
+            store.inventory[i].quantity += formattedQuantity;
 
-            inventory[i].status = 
-                inventory[i].quantity === 0 ? "Out of Stock" :
-                inventory[i].quantity <= 3 ? "Low on Stock" :
-                "In Stock";
+            store.inventory[i].status =
+                store.inventory[i].quantity === 0 ? "Out of Stock" :
+                store.inventory[i].quantity <= 3 ? "Low on Stock" :
+                    "In Stock";
 
-            if (oldStatus !== inventory[i].status) {
-                console.log(`Status for "${formattedName}" changed from ${oldStatus} to ${inventory[i].status}`);
+            if (oldStatus !== store.inventory[i].status) {
+                console.log(`Status for "${formattedName}" changed from ${oldStatus} to ${store.inventory[i].status}`);
             } else {
                 console.log(`Quantity updated for "${formattedName}".`);
             }
             break;
         }
     }
-            
+
     if (!itemFound) {
         const add = { name: formattedName, quantity: formattedQuantity, price: formattedPrice, status };
-        inventory.push(add);
-        console.lsog(`Item: "${formattedName}" added! (Qty: ${formattedQuantity}, Price: ${formattedPrice})`);
+        store.inventory.push(add);
+        console.log(`Item: "${formattedName}" added! (Qty: ${formattedQuantity}, Price: ${formattedPrice})`);
     }
 };
-}
 
-const showItems = function(filterType = "all", inventory) {
-    
+const showItems = function (filterType = "all") {
     let finalInventory = [];
 
-    if (filterType !== "in" && filterType !== "low" && filterType !== "out" && filterType !== "all") {
-    console.log("❌ Unknown filter: 'instock'. Try 'in', 'low', 'out', or 'all'.");
-    return;
+    if (!["in", "low", "out", "all"].includes(filterType)) {
+        console.log("❌ Unknown filter: Try 'in', 'low', 'out', or 'all'.");
+        return;
     }
 
-
     if (filterType === "in") {
-        finalInventory = inventory.filter(item => item.status === "In Stock");
-    } else if  (filterType === "low") {
-        finalInventory = inventory.filter(item => item.status === "Low on Stock");
+        finalInventory = store.inventory.filter(item => item.status === "In Stock");
+    } else if (filterType === "low") {
+        finalInventory = store.inventory.filter(item => item.status === "Low on Stock");
     } else if (filterType === "out") {
-        finalInventory = inventory.filter(item => item.status === "Out of Stock");
-    } 
+        finalInventory = store.inventory.filter(item => item.status === "Out of Stock");
+    } else {
+        finalInventory = [...store.inventory];
+    }
 
-    
-    finalInventory.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+    finalInventory.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
     if (finalInventory.length === 0) {
         console.log("No items found");
         return;
     }
 
-    for (let i = 0; i < finalInventory.length; i += 1) {
-        console.log(`"${i + 1}". ${finalInventory[i].name} - Qty: ${finalInventory[i].quantity} - Price: ${finalInventory[i].price} - Status: ${finalInventory[i].status}`);
-    }
+    finalInventory.forEach((item, i) => {
+        console.log(`"${i + 1}". ${item.name} - Qty: ${item.quantity} - Price: ${item.price} - Status: ${item.status}`);
+    });
+};
 
-const deleteItems = function(inventoryList, inventoryName) {
-
+const deleteItems = function (inventoryList, inventoryName) {
     const removeItem = inventoryList.findIndex(item => item.name.toLowerCase() === inventoryName.toLowerCase());
-    
+
     if (removeItem === -1) {
         console.log(`${inventoryName} not found.`);
-        for (let i = 0; i < inventoryList.length; i += 1) {
-        console.log(`"${i + 1}". ${inventoryList[i].name} - Qty: ${inventoryList[i].quantity} - Price: ${inventoryList[i].price} - Status: ${inventoryList[i].status}`);
-        }
-        return false;
+        return;
     } else {
         inventoryList.splice(removeItem, 1);
-        console.log(`Item: ${inventoryName} deleted.`);   
+        console.log(`Item: ${inventoryName} deleted.`);
     }
 
     if (inventoryList.length === 0) {
-    console.log("Inventory is now empty.");
-}
+        console.log("Inventory is now empty.");
+    }
 };
 
 const deleteLastItem = function (inventoryList) {
-    const removedItem= inventoryList.pop();
-    
+    const removedItem = inventoryList.pop();
+
     if (removedItem) {
         console.log(`🗑️ Removed: ${removedItem.name} — Qty: ${removedItem.quantity}`);
     } else {
-         console.log("⚠️ Inventory is empty — nothing to delete.");
-}
-    inventoryList.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-
-    for (let i  = 0; i < inventoryList.length; i+=1) {
-        console.log(`"${i + 1}". ${inventoryList[i].name} - Qty: ${inventoryList[i].quantity} - Price: ${inventoryList[i].price} - Status: ${inventoryList[i].status}`);
+        console.log("⚠️ Inventory is empty — nothing to delete.");
     }
 };
 
-const printInventory = function(inventoryList, filterType) {
-
-    const all = [...inventoryList];
-    const sortAll = all.sort((a, b) => a.name.localeCompare(b.name));
-    for (let i = 0; i <sortAll.length; i+=1) {
-        console.log(`"${i + 1}". ${sortAll[i].name} - Qty: ${sortAll[i].quantity} - Price: ${sortAll[i].price} - Status: ${sortAll[i].status}`);
-    }
-    }
-const renderItems = function(array) {
-        if (array.length === 0) {
+const renderItems = function (array) {
+    if (array.length === 0) {
         console.log("⚠️ Inventory is empty.");
-        } else {
-        for (let i = 0; i < array.length; i++) {
-        console.log(`"${i + 1}". ${array[i].name} - Qty: ${array[i].quantity} - Price: ${array[i].price} - Status: ${array[i].status}`);
-        }
+    } else {
+        array.forEach((item, i) => {
+            console.log(`"${i + 1}". ${item.name} - Qty: ${item.quantity} - Price: ${item.price} - Status: ${item.status}`);
+        });
     }
 };
-function getInStockItems(list) {
-    return list.filter(item => getStatus(item) === "In Stock");
-};
 
-function getLowStockItems(list) {
-     return list.filter(item => getStatus(item) === "Low Stock");
-};
-
-function getOutStockItems (list) {
-    return list.filter(item => getStatus(item) === "Out of Stock");
-};
-
-function printFilteredInventory(list, filterType) {
-
-
-    if (filterType !== "in" && filterType !== "low" && filterType !== "out") {
-    console.log(`❌ Unknown filter: '${filterType}'. Try 'in', 'low', or 'out'.`);
-    return;
-    }
-
-    if (filterType === "in") {
-    const sortedIn = getInStockItems(list).sort ((a, b) => a.name.localeCompare(b.name));
-    renderItems(sortedIn);
-    }
-    if (filterType === "low") {
-    const sortedLow = getLowStockItems(list).sort ((a, b) => a.name.localeCompare(b.name));
-    renderItems(sortedLow);
-    }
-    if (filterType === "out") {
-    const sortedOut = getOutStockItems(list).sort ((a, b) => a.name.localeCompare(b.name));
-    renderItems(sortedOut);
-    }
-}
-
-    function getStatus(quantity) {
-        return quantity === 0
+function getStatus(quantity) {
+    return quantity === 0
         ? "Out of Stock"
         : quantity <= 3
-        ? "Low Stock"
-        : "In Stock";
+            ? "Low Stock"
+            : "In Stock";
+}
+
+function searchItem(inventoryList, itemName) {
+    if (!itemName.trim()) {
+        console.log("🔎 Please enter an item name to search.");
+        return;
     }
 
-const searchItem = function(inventoryList, itemName) {
-  if (!itemName.trim()) {
-    console.log("🔎 Please enter an item name to search.");
-    return;
-  }
+    const findItem = inventoryList.filter(item =>
+        item.name.toLowerCase().includes(itemName.toLowerCase())
+    );
 
-  const findItem = inventoryList.filter(item =>
-    item.name.toLowerCase().includes(itemName.toLowerCase())
-  );
+    if (findItem.length === 0) {
+        console.log("📭 Sorry, no items matched your search.");
+        return;
+    }
 
-  if (findItem.length === 0) {
-    console.log("📭 Sorry, no items matched your search.");
-    return;
-  } else {
-    const formattedItem = findItem.map(item => {
-      const name = item.name;
-      const quantity = item.quantity;
-      const status = getStatus(quantity);
+    findItem.forEach(item => {
+        console.log(`Found: ${item.name} - Quantity: ${item.quantity} - Status: ${getStatus(item.quantity)}`);
+    });
+}
 
-      return `Found: ${name} - Quantity: ${quantity} - Status: ${status}`;
+function markAsSold(inventory, itemName, quantitySold) {
+    quantitySold = parseFloat(quantitySold);
+    const item = inventory.find(item => item.name === itemName);
+
+    if (!item) return `❌ "${itemName}" not found.`;
+
+    if (isNaN(quantitySold) || quantitySold < 0) return "Invalid. Please input a valid number";
+    if (quantitySold > item.quantity) return `❌ Not enough stock. Only ${item.quantity} left.`;
+
+    item.quantity -= quantitySold;
+
+    const stockStatus = item.quantity === 0
+        ? "🔴 Sold Out!"
+        : item.quantity < 5
+            ? "(Low Stock)"
+            : "";
+
+    return `✅ ${quantitySold} ${itemName} sold.\nRemaining: ${item.quantity} ${stockStatus}`;
+}
+
+function recordSale(itemName, itemQuantity, itemPrice) {
+    const item = store.inventory.find(item => item.name === itemName);
+    if (!item) return "Item not found in inventory";
+
+    if (item.quantity === 0) return "Sale failed: item out of stock.";
+    if (isNaN(itemQuantity) || itemQuantity <= 0) return "Invalid Quantity";
+    if (itemQuantity > 100) return "Maximum allowed is 100";
+    if (itemQuantity > item.quantity) return "Not enough stock.";
+
+    item.quantity -= itemQuantity;
+    const timestamp = new Date().toISOString();
+    const saleTotal = itemPrice * itemQuantity;
+
+    store.salesLog.push({
+        itemName: item.name,
+        quantitySold: itemQuantity,
+        saleTotal,
+        timestamp,
     });
 
-    formattedItem.forEach(output => console.log(output));
-  }
-};
+    return `Sold ${itemQuantity} of ${item.name}. Remaining stock: ${item.quantity}. Timestamp: ${timestamp} (Total Sale amount: ${saleTotal})`;
 }
- 
+
+const salesReport = function () {
+    const report = store.salesLog.reduce((acc, entry) => {
+        const time = Date.parse(entry.timestamp);
+
+        acc.itemQuantity += entry.quantitySold;
+        acc.totalSale += entry.saleTotal;
+
+        acc.byItem[entry.itemName] = (acc.byItem[entry.itemName] || 0) + entry.quantitySold;
+
+        acc.earliest = Math.min(acc.earliest, time);
+        acc.latest = Math.max(acc.latest, time);
+
+        return acc;
+    }, {
+        itemQuantity: 0,
+        totalSale: 0,
+        byItem: {},
+        earliest: Infinity,
+        latest: -Infinity
+    });
+
+    let topItem = null;
+    let topQuantity = -Infinity;
+
+    for (const [item, quantity] of Object.entries(report.byItem)) {
+        if (quantity > topQuantity) {
+            topQuantity = quantity;
+            topItem = item;
+        }
+    }
+
+    return {
+        ...report,
+        topItem,
+        topQuantity
+    };
+};
+
+const report = salesReport();
+
+console.log(`Item Quantity: ${report.itemQuantity}`);
+console.log(`Total Sales: ${report.totalSale}`);
+console.log(`By Item: ${JSON.stringify(report.byItem, null, 2)}`);
+console.log(`Top Seller: ${report.topItem} (${report.topQuantity})`);
+console.log(`Earliest Sale: ${new Date(report.earliest).toLocaleString()}`);
+console.log(`Latest Sale: ${new Date(report.latest).toLocaleString()}`);
+
+addItem("apple", 10, 15.5);
+addItem("banana", 5, 8.75);
+addItem("apple", 5, 15.5); // update
+
+listItems(); // shows inventory
+
+markAsSold("apple", 3);
+markAsSold("banana", 2);
+
+listItems(); // updated inventory
+
+showTopSelling(); // sales report
+showSummary();    // total summary
     </script>
 </body>
 </html>
